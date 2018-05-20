@@ -1,3 +1,4 @@
+#include <deque>
 #include <iomanip>
 #include <iostream>
 
@@ -60,9 +61,7 @@ void Tree::printHelper( Node* p, int indent = 0 ) {
     }
 #else
     if ( p != nullptr ) {
-        std::cout << p->id << ", depth = " << p->depth
-                  << ", isLeaf = " << p->isLeaf
-                  << ", numLeaves = " << p->numLeaves << std::endl;
+        printNode( p );
         if ( p->left ) {
             printHelper( p->left, 0 );
         }
@@ -71,4 +70,67 @@ void Tree::printHelper( Node* p, int indent = 0 ) {
         }
     }
 #endif
+}
+
+void Tree::printNode( Node* node ) {
+    std::cout << node->id << ", depth = " << node->depth
+              << ", isLeaf = " << node->isLeaf
+              << ", numLeaves = " << node->numLeaves << std::endl;
+}
+
+#define DEBUG
+
+void Tree::optimize( int numLeaves ) {
+    auto q = findAllNodesWithNumLeaves( root, numLeaves );
+
+#ifdef DEBUG
+    for ( auto& node : q ) {
+        printNode( node );
+    }
+#endif
+
+    while ( !q.empty() ) {
+    }
+}
+
+Tree::Node* Tree::findPermutationAndReplaceByEquivalentNode( Node* node ) {
+    auto leaves = findAllLeaves( node );
+
+    struct computeNode {
+        std::deque<Tree::Node> nodes;
+        int                    leftPointer;
+        int                    rightPointer;
+    };
+
+    return (Node*)nullptr;
+}
+
+std::deque<Tree::Node*> Tree::findAllNodes(
+    Node* node, std::function<bool( Node* )> const& filter ) {
+    std::deque<Tree::Node*> q;
+
+    if ( node == nullptr ) return q;
+
+    if ( filter( node ) ) {
+        q.push_back( node );
+    }
+
+    auto q_left = findAllNodes( node->left, filter );
+    q.insert( q.end(), q_left.begin(), q_left.end() );
+
+    auto q_right = findAllNodes( node->right, filter );
+    q.insert( q.end(), q_right.begin(), q_right.end() );
+
+    return q;
+}
+
+std::deque<Tree::Node*> Tree::findAllLeaves( Node* node ) {
+    return findAllNodes( node, []( Node* node ) { return node->isLeaf; } );
+}
+
+std::deque<Tree::Node*> Tree::findAllNodesWithNumLeaves( Node* node,
+                                                         int   numLeaves ) {
+    return findAllNodes( node, [numLeaves]( Node* node ) {
+        return node->numLeaves == numLeaves;
+    } );
 }

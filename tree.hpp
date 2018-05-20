@@ -1,5 +1,7 @@
 #pragma once
 
+#include <deque>
+
 class Tree {
    public:
     class Node {
@@ -18,7 +20,7 @@ class Tree {
     Node* root = nullptr;
 
     void update();
-    void optimize();
+    void optimize( int numLeaves = 4 );
 
     void print();
 
@@ -27,4 +29,11 @@ class Tree {
     void updateIsLeafHelper( Node* );
     int  updateNumLeavesHelper( Node* );
     void printHelper( Node*, int );
+    void printNode( Node* node );
+    Tree::Node* findPermutationAndReplaceByEquivalentNode( Node* node );
+    std::deque<Tree::Node*> findAllNodes(
+        Node* node, std::function<bool( Node* )> const& filter );
+    std::deque<Tree::Node*> findAllLeaves( Node* node );
+    std::deque<Tree::Node*> findAllNodesWithNumLeaves( Node* node,
+                                                       int   numLeaves );
 };

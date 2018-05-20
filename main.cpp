@@ -30,6 +30,7 @@ int main() {
     tree->root->right->right->right       = new Tree::Node( 13 );
 
     tree->update();
+    tree->optimize();
 
     tree->print();
 
