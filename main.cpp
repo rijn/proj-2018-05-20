@@ -30,7 +30,9 @@ int main() {
     tree->root->right->right->right       = new Tree::Node( 13 );
 
     tree->update();
-    tree->optimize();
+    tree->optimize(
+        []( Tree::Node a, Tree::Node b ) { return a.id + b.id; },
+        []( Tree::Node a, Tree::Node b ) { return Tree::Node( 0 ); } );
 
     tree->print();
 
