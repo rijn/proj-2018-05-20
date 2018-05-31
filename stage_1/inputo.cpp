@@ -575,3 +575,25 @@ void CInput::deleteArray() {
     delete[] AP;
     delete[] tree_node;
 }
+
+Tree* CInput::mapToTree() {
+    auto tree = new Tree();
+
+    tree->root = new Tree::Node( 2 * num_of_sinks - 2 );
+
+    mapToTreeHelper( tree->root, 2 * num_of_sinks - 2 );
+
+    tree->update();
+
+    return tree;
+}
+
+void CInput::mapToTreeHelper( Tree::Node* node, int key ) {
+    auto originalNode = tree_node[key];
+    if ( originalNode.lchild == -1 ) return;
+    node->left  = new Tree::Node( originalNode.lchild );
+    node->right = new Tree::Node( originalNode.rchild );
+
+    mapToTreeHelper( node->left, originalNode.lchild );
+    mapToTreeHelper( node->right, originalNode.rchild );
+}

@@ -20,6 +20,8 @@
  ************************************************************************/
 #ifndef INPUT_H
 #define INPUT_H
+
+#include "../tree.hpp"
 #include "AP.h"
 #include "stdafx.h"
 
@@ -163,6 +165,9 @@ class CInput {
     void debug();
 
     void output4DME();  // the input data for 3D-GB-DME
+
+    Tree* mapToTree();
+
    private:
     // bool compMC(const MergingCell &a, const MergingCell &b);
     double getMergingCost( int a, int b );
@@ -179,5 +184,7 @@ class CInput {
     void postOrder( InitTopoTree root );
 
     void deleteArray();
+
+    void mapToTreeHelper( Tree::Node* node, int key );
 };
 #endif

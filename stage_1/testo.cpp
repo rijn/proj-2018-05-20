@@ -1,6 +1,9 @@
 //#include <input_ibm.h>
 #include <sys/time.h>
+
 #include "inputo.h"
+#include "../tree.hpp"
+
 //#define FILE "ispd2009/s1"
 #define FILE "ispd2009/ispd09f31"
 //#define FILE "ibm/r5.txt"
@@ -8,6 +11,7 @@
 #define IS_LOAD1 0
 #define IS_LOAD2 0
 #define NUM_OF_LAYERS 2
+
 int main() {
     // ofstream f_test("testfile");
     // if (!f_test.is_open())      cout << "love's beautiful so beautiful" <<
@@ -26,21 +30,27 @@ int main() {
     cout.precision( 20 );
 
     CInput input;
-    input.setInputData( FILE, 0 );  //从benchmark ispd2009/s1中读取数据
-    input.modiFile(
-        NUM_OF_LAYERS );  //为了强行把一层变成两层而保持芯片面积不变，每层强行变化一下所有坐标缩小了√2倍
-    input.divideCircuit(
-        NUM_OF_LAYERS,
-        IS_LOAD1 );  //强行把一维的只有xy坐标的点分成两层，加上z坐标
-    input.generateAP( IS_LOAD2 );  //调用AP.cpp 生成activity
-                                   //pattern。以上函数都不用管它，不用改
+
+    //从benchmark ispd2009/s1中读取数据
+    input.setInputData( FILE, 0 );
+
+    //为了强行把一层变成两层而保持芯片面积不变，每层强行变化一下所有坐标缩小了√2倍
+    input.modiFile( NUM_OF_LAYERS );
+
+    //强行把一维的只有xy坐标的点分成两层，加上z坐标
+    input.divideCircuit( NUM_OF_LAYERS, IS_LOAD1 );
+
+    //调用AP.cpp 生成activity
+    input.generateAP( IS_LOAD2 );
+
+    // pattern。以上函数都不用管它，不用改
 
     gettimeofday( &start2, NULL );  // gettimeofday(&start,&tz);结果一样
     cout << "start2_tv_sec:" << start2.tv_sec << endl;
     cout << "start2_tv_usec:" << start2.tv_usec << endl;
 
-    input
-        .NNS();  //最近邻选择算法，用这种算法每次选最小cost的配对，生成拓扑二叉树
+    //最近邻选择算法，用这种算法每次选最小cost的配对，生成拓扑二叉树
+    input.NNS();
 
     gettimeofday( &end2, NULL );
     cout << "end2_tv_sec:" << end2.tv_sec << endl;
@@ -49,10 +59,22 @@ int main() {
             start2.tv_usec;
     cout << "total time2 use is " << diff2 << endl;
 
-    input.outputInitTree( 0 );  //输出生成的拓扑二叉树
-    input.DLE();  //一个算法，优化中间节点的z坐标。不用管它
-    input.outputInsertedTopoTree();  //输出优化过后的树
-    input.output4DME();              //输出dme_inputfile
+    //输出生成的拓扑二叉树
+    input.outputInitTree( 0 );
+
+    //一个算法，优化中间节点的z坐标。不用管它
+    input.DLE();
+
+    //输出优化过后的树
+    input.outputInsertedTopoTree();
+
+    // Optimize
+    auto tree = input.mapToTree();
+    
+
+    //输出dme_inputfile
+    input.output4DME();
+
     input.debug();
     gettimeofday( &end1, NULL );
 
