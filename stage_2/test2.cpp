@@ -20,15 +20,15 @@
  ************************************************************************/
 #include "GBDME.h"
 #define FILE "DME_inputfile"
-int main(){
-    cout.precision(20);
+int main() {
+    cout.precision( 20 );
 
     CGBDME dme;
-    dme.setInputData(FILE);
-    dme.dme(1);
+    dme.setInputData( FILE );
+    dme.dme( 1 );
     dme.outputRes();
-    //dme.debug_input();
-    //dme.debug_readBufLUT();
+    // dme.debug_input();
+    // dme.debug_readBufLUT();
     dme.debug_loc();
     dme.debug_detour();
     dme.debug_iter_comp();

@@ -20,20 +20,18 @@
  ************************************************************************/
 #ifndef STDAFX_H
 #define STDAFX_H
-#include <iostream>
 #include <math.h>
-#include <fstream>
-#include <string>
-#include <sstream>
 #include <stdlib.h>
 #include <time.h>
-#include <list>
-#include <vector>
 #include <algorithm>
-#include <set>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <list>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 using namespace std;
-
-
 
 #endif

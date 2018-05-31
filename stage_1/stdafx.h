@@ -18,20 +18,18 @@
     >                ----------------------------------
     > @Others:
  ************************************************************************/
-#ifndef STDAFX_H 
-#define STDAFX_H 
-#include <iostream>
+#ifndef STDAFX_H
+#define STDAFX_H
 #include <math.h>
-#include <fstream>
-#include <string>
 #include <stdlib.h>
 #include <time.h>
-#include <list>
-#include <vector>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <list>
 #include <set>
+#include <string>
+#include <vector>
 using namespace std;
-
-
 
 #endif
