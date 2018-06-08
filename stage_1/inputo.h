@@ -168,9 +168,10 @@ class CInput {
 
     Tree* mapToTree();
 
+    double getMergingCost( int a, int b );
+
    private:
     // bool compMC(const MergingCell &a, const MergingCell &b);
-    double getMergingCost( int a, int b );
     void mergeNode( int inner, int a, int b );
     double distance( double a_x, double a_y, double b_x, double b_y );
     double abs( double x );

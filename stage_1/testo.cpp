@@ -62,15 +62,19 @@ int main() {
     //输出生成的拓扑二叉树
     input.outputInitTree( 0 );
 
+    auto tree = input.mapToTree();
+    tree->update();
+    tree->optimize(
+        [&](Tree::Node a, Tree::Node b){
+            return input.getMergingCost(a.id, b.id);
+        },
+        []( Tree::Node a, Tree::Node b ) { return Tree::Node( a ); } );
+
     //一个算法，优化中间节点的z坐标。不用管它
     input.DLE();
 
     //输出优化过后的树
     input.outputInsertedTopoTree();
-
-    // Optimize
-    auto tree = input.mapToTree();
-    
 
     //输出dme_inputfile
     input.output4DME();
