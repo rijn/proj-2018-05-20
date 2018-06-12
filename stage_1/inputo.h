@@ -186,6 +186,7 @@ class CInput {
 
     void deleteArray();
 
+    void copySinkToTreeNode( Tree<Sink *>::Node* node, int key );
     void mapToTreeHelper( Tree<Sink *>::Node* node, int key );
 };
 #endif

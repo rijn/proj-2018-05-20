@@ -580,6 +580,7 @@ Tree<Sink *>* CInput::mapToTree() {
     auto tree = new Tree<Sink *>();
 
     tree->root = new Tree<Sink *>::Node( 2 * num_of_sinks - 2 );
+    copySinkToTreeNode(tree->root, 2 * num_of_sinks - 2);
 
     mapToTreeHelper( tree->root, 2 * num_of_sinks - 2 );
 
@@ -588,11 +589,18 @@ Tree<Sink *>* CInput::mapToTree() {
     return tree;
 }
 
+void CInput::copySinkToTreeNode( Tree<Sink *>::Node* node, int key ) {
+    node->data = new Sink();
+    memcpy(node->data, &sink[key], sizeof(sink[key]));
+}
+
 void CInput::mapToTreeHelper( Tree<Sink *>::Node* node, int key ) {
     auto originalNode = tree_node[key];
     if ( originalNode.lchild == -1 ) return;
     node->left  = new Tree<Sink *>::Node( originalNode.lchild );
+    copySinkToTreeNode(node->left, originalNode.lchild);
     node->right = new Tree<Sink *>::Node( originalNode.rchild );
+    copySinkToTreeNode(node->right, originalNode.rchild);
 
     mapToTreeHelper( node->left, originalNode.lchild );
     mapToTreeHelper( node->right, originalNode.rchild );
