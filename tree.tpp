@@ -7,21 +7,24 @@
 
 #include "tree.hpp"
 
-void Tree::update() {
+template <class T>
+void Tree<T>::update() {
     updateDepthHelper( root, 0 );
     updateIsLeafHelper( root );
     updateNumLeavesHelper( root );
     root->updateParentHelper( nullptr );
 }
 
-void Tree::updateDepthHelper( Node* node, int depth ) {
+template <class T>
+void Tree<T>::updateDepthHelper( Node* node, int depth ) {
     if ( node == nullptr ) return;
     node->depth = depth;
     updateDepthHelper( node->left, depth + 1 );
     updateDepthHelper( node->right, depth + 1 );
 }
 
-void Tree::updateIsLeafHelper( Node* node ) {
+template <class T>
+void Tree<T>::updateIsLeafHelper( Node* node ) {
     if ( node == nullptr ) return;
     if ( node->left == nullptr && node->right == nullptr ) {
         node->isLeaf = true;
@@ -32,7 +35,8 @@ void Tree::updateIsLeafHelper( Node* node ) {
     }
 }
 
-int Tree::updateNumLeavesHelper( Node* node ) {
+template <class T>
+int Tree<T>::updateNumLeavesHelper( Node* node ) {
     if ( node == nullptr ) return 0;
     if ( node->isLeaf ) {
         node->numLeaves = 1;
@@ -43,17 +47,20 @@ int Tree::updateNumLeavesHelper( Node* node ) {
     return node->numLeaves;
 }
 
-void Tree::Node::updateParentHelper( Node* parent ) {
+template <class T>
+void Tree<T>::Node::updateParentHelper( Node* parent ) {
     this->parent = parent;
     if ( this->left != nullptr ) this->left->updateParentHelper( this );
     if ( this->right != nullptr ) this->right->updateParentHelper( this );
 }
 
-void Tree::print() {
+template <class T>
+void Tree<T>::print() {
     printHelper( root, 0 );
 }
 
-void Tree::printHelper( Node* p, int indent = 0 ) {
+template <class T>
+void Tree<T>::printHelper( Node* p, int indent /* = 0 */ ) {
 #if 1
     if ( p != nullptr ) {
         if ( p->right ) {
@@ -82,7 +89,8 @@ void Tree::printHelper( Node* p, int indent = 0 ) {
 #endif
 }
 
-void Tree::printNode( Node* node ) {
+template <class T>
+void Tree<T>::printNode( Node* node ) {
     if ( node == nullptr ) {
         std::cout << "nullptr" << std::endl;
         return;
@@ -94,7 +102,8 @@ void Tree::printNode( Node* node ) {
 
 #define DEBUG
 
-void Tree::optimize( std::function<float( Tree::Node, Tree::Node )> distance,
+template <class T>
+void Tree<T>::optimize( std::function<float( Tree::Node, Tree::Node )> distance,
                      std::function<Tree::Node( Tree::Node, Tree::Node )> merge,
                      int numLeaves ) {
     auto q = findAllNodesWithNumLeaves( root, numLeaves );
@@ -133,13 +142,14 @@ void Tree::optimize( std::function<float( Tree::Node, Tree::Node )> distance,
 
         q.pop_front();
 
-        std::cout << "tree after merge" << std::endl;
-        printHelper( root );
-        std::cout << "-----" << std::endl;
+        // std::cout << "tree after merge" << std::endl;
+        // printHelper( root );
+        // std::cout << "-----" << std::endl;
     }
 }
 
-void Tree::pushPossibleNodes( std::deque<Tree::Node*>& q, Node* node,
+template <class T>
+void Tree<T>::pushPossibleNodes( std::deque<Tree::Node*>& q, Node* node,
                               int numLeaves ) {
     if ( node == nullptr ) return;
     if ( node->numLeaves == numLeaves ) {
@@ -148,15 +158,16 @@ void Tree::pushPossibleNodes( std::deque<Tree::Node*>& q, Node* node,
     pushPossibleNodes( q, node->parent, numLeaves );
 }
 
-Tree::Node* Tree::findPermutationAndReplaceByEquivalentNode(
+template <class T>
+typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
     Node* node, std::function<float( Tree::Node, Tree::Node )> distance,
     std::function<Tree::Node( Tree::Node, Tree::Node )> merge ) {
     auto leaves = findAllLeaves( node );
 
     struct computeNode {
-        std::deque<Tree::Node>           nodes;
-        std::deque<Tree::Node>::iterator leftIterator;
-        std::deque<Tree::Node>::iterator rightIterator;
+        typename std::deque<Tree<T>::Node>           nodes;
+        typename std::deque<Tree<T>::Node>::iterator leftIterator;
+        typename std::deque<Tree<T>::Node>::iterator rightIterator;
         float                            cost;
     };
 
@@ -200,11 +211,11 @@ Tree::Node* Tree::findPermutationAndReplaceByEquivalentNode(
             continue;
         }
 
-        std::cout << top.nodes.size() << " ["
-                  << std::distance( top.nodes.begin(), top.leftIterator )
-                  << ", "
-                  << std::distance( top.nodes.begin(), top.rightIterator )
-                  << "]" << std::endl;
+        // std::cout << top.nodes.size() << " ["
+        //           << std::distance( top.nodes.begin(), top.leftIterator )
+        //           << ", "
+        //           << std::distance( top.nodes.begin(), top.rightIterator )
+        //           << "]" << std::endl;
 
         computeNode nextNode;
         for ( auto it = top.nodes.begin(); it != top.nodes.end(); it++ ) {
@@ -227,13 +238,15 @@ Tree::Node* Tree::findPermutationAndReplaceByEquivalentNode(
     return equivalentNode;
 }
 
-void Tree::updateNumLeavesUpward( Node* node, int diffNumLeaves ) {
+template <class T>
+void Tree<T>::updateNumLeavesUpward( Node* node, int diffNumLeaves ) {
     if ( node == nullptr ) return;
     node->numLeaves -= diffNumLeaves;
     updateNumLeavesUpward( node->parent, diffNumLeaves );
 }
 
-std::deque<Tree::Node*> Tree::findAllNodes(
+template <class T>
+std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodes(
     Node* node, std::function<bool( Node* )> const& filter ) {
     std::deque<Tree::Node*> q;
 
@@ -252,11 +265,13 @@ std::deque<Tree::Node*> Tree::findAllNodes(
     return q;
 }
 
-std::deque<Tree::Node*> Tree::findAllLeaves( Node* node ) {
+template <class T>
+std::deque<typename Tree<T>::Node*> Tree<T>::findAllLeaves( Node* node ) {
     return findAllNodes( node, []( Node* node ) { return node->isLeaf; } );
 }
 
-std::deque<Tree::Node*> Tree::findAllNodesWithNumLeaves( Node* node,
+template <class T>
+std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodesWithNumLeaves( Node* node,
                                                          int   numLeaves ) {
     return findAllNodes( node, [numLeaves]( Node* node ) {
         return node->numLeaves == numLeaves;

@@ -166,7 +166,7 @@ class CInput {
 
     void output4DME();  // the input data for 3D-GB-DME
 
-    Tree* mapToTree();
+    Tree<Sink *>* mapToTree();
 
     double getMergingCost( int a, int b );
 
@@ -186,6 +186,6 @@ class CInput {
 
     void deleteArray();
 
-    void mapToTreeHelper( Tree::Node* node, int key );
+    void mapToTreeHelper( Tree<Sink *>::Node* node, int key );
 };
 #endif

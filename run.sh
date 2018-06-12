@@ -2,7 +2,7 @@ rm -rf ./temp
 mkdir temp
 
 cd stage_1
-clang++ -std=c++14 inputo.cpp AP.cpp ../tree.cpp testo.cpp -o execute
+clang++ -std=c++14 inputo.cpp AP.cpp testo.cpp -o execute
 cd ..
 mv ./stage_1/execute ./temp/run_stage_1
 

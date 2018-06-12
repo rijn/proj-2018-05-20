@@ -3,6 +3,7 @@
 #include <deque>
 #include <functional>
 
+template <class T>
 class Tree {
    public:
     class Node {
@@ -15,6 +16,8 @@ class Tree {
         int  depth     = 0;
         bool isLeaf    = false;
         int  numLeaves = 0;
+
+        T data;
 
         Node( int _id ) : id( _id ){};
         Node( const Node& other ) {
@@ -44,9 +47,9 @@ class Tree {
     void updateDepthHelper( Node*, int );
     void updateIsLeafHelper( Node* );
     int  updateNumLeavesHelper( Node* );
-    void printHelper( Node*, int );
+    void printHelper( Node*, int = 0 );
     void printNode( Node* node );
-    Tree::Node* findPermutationAndReplaceByEquivalentNode(
+    Tree<T>::Node* findPermutationAndReplaceByEquivalentNode(
         Node* node, std::function<float( Tree::Node, Tree::Node )> distance,
         std::function<Tree::Node( Tree::Node, Tree::Node )> merge );
     std::deque<Tree::Node*> findAllNodes(
@@ -58,3 +61,5 @@ class Tree {
     std::deque<Tree::Node*> findAllNodesWithNumLeaves( Node* node,
                                                        int   numLeaves );
 };
+
+#include "tree.tpp"

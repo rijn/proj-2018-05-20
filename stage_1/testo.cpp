@@ -1,8 +1,8 @@
 //#include <input_ibm.h>
 #include <sys/time.h>
 
-#include "inputo.h"
 #include "../tree.hpp"
+#include "inputo.h"
 
 //#define FILE "ispd2009/s1"
 #define FILE "ispd2009/ispd09f31"
@@ -65,10 +65,10 @@ int main() {
     auto tree = input.mapToTree();
     tree->update();
     tree->optimize(
-        [&](Tree::Node a, Tree::Node b){
+        [&](Tree<Sink *>::Node a, Tree<Sink *>::Node b){
             return input.getMergingCost(a.id, b.id);
         },
-        []( Tree::Node a, Tree::Node b ) { return Tree::Node( a ); } );
+        []( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) { return Tree<Sink *>::Node( a ); } );
 
     //一个算法，优化中间节点的z坐标。不用管它
     input.DLE();
