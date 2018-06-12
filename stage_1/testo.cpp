@@ -65,10 +65,13 @@ int main() {
     auto tree = input.mapToTree();
     tree->update();
     tree->optimize(
-        [&](Tree<Sink *>::Node a, Tree<Sink *>::Node b){
-            return input.getMergingCost(a.id, b.id);
+        [&]( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
+            return input.getMergingCost( a.id, b.id );
         },
-        []( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) { return Tree<Sink *>::Node( a ); } );
+        []( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
+            Tree<Sink *>::Node _node( 0 );
+            return _node;
+        } );
 
     //一个算法，优化中间节点的z坐标。不用管它
     input.DLE();

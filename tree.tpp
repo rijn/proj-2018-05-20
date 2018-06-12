@@ -103,9 +103,9 @@ void Tree<T>::printNode( Node* node ) {
 #define DEBUG
 
 template <class T>
-void Tree<T>::optimize( std::function<float( Tree::Node, Tree::Node )> distance,
-                     std::function<Tree::Node( Tree::Node, Tree::Node )> merge,
-                     int numLeaves ) {
+void Tree<T>::optimize(
+    std::function<float( Tree::Node, Tree::Node )>      distance,
+    std::function<Tree::Node( Tree::Node, Tree::Node )> merge, int numLeaves ) {
     auto q = findAllNodesWithNumLeaves( root, numLeaves );
 
 #ifdef DEBUG
@@ -150,7 +150,7 @@ void Tree<T>::optimize( std::function<float( Tree::Node, Tree::Node )> distance,
 
 template <class T>
 void Tree<T>::pushPossibleNodes( std::deque<Tree::Node*>& q, Node* node,
-                              int numLeaves ) {
+                                 int numLeaves ) {
     if ( node == nullptr ) return;
     if ( node->numLeaves == numLeaves ) {
         q.push_back( node );
@@ -168,7 +168,7 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
         typename std::deque<Tree<T>::Node>           nodes;
         typename std::deque<Tree<T>::Node>::iterator leftIterator;
         typename std::deque<Tree<T>::Node>::iterator rightIterator;
-        float                            cost;
+        float                                        cost;
     };
 
     float minimalCost    = std::numeric_limits<float>::max();
@@ -271,8 +271,8 @@ std::deque<typename Tree<T>::Node*> Tree<T>::findAllLeaves( Node* node ) {
 }
 
 template <class T>
-std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodesWithNumLeaves( Node* node,
-                                                         int   numLeaves ) {
+std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodesWithNumLeaves(
+    Node* node, int numLeaves ) {
     return findAllNodes( node, [numLeaves]( Node* node ) {
         return node->numLeaves == numLeaves;
     } );
