@@ -1,5 +1,6 @@
 //#include <input_ibm.h>
 #include <sys/time.h>
+#include <unordered_map>
 
 #include "../tree.hpp"
 #include "inputo.h"
@@ -64,14 +65,86 @@ int main() {
 
     auto tree = input.mapToTree();
     tree->update();
+    cout << "Update finish" << endl;
+    int key = -1;
     tree->optimize(
-        [&]( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
-            return input.getMergingCost( a.id, b.id );
+        [&]( Tree<Sink *>::Node& a, Tree<Sink *>::Node& b ) {
+          double GI = input.cw * input.distance( a.data->x, a.data->y, b.data->x, b.data->y );
+          double LI = input.cv * ( abs( a.data->z - b.data->z ) );
+          double BI = ( a.data->cl * a.data->p + b.data->cl * b.data->p ) +
+                      0.5 * input.cg * ( a.data->ptr + b.data->ptr );
+          return (float)( GI + LI + BI );
         },
-        []( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
-            Tree<Sink *>::Node _node( 0 );
-            return _node;
+        [&]( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
+          Tree<Sink *>::Node node(-1);
+          node.data = new Sink();
+
+          int *  t_ap = input.cap.getAP( a.data->ap, b.data->ap );
+          double x1, x2, y1, y2, cx1, cx2, cy1, cy2;
+          if ( a.data->x <= b.data->x ) {
+              x1  = a.data->x;
+              x2  = b.data->x;
+              cx1 = a.data->cl;
+              cx2 = b.data->cl;
+          } else {
+              x1  = b.data->x;
+              x2  = a.data->x;
+              cx1 = b.data->cl;
+              cx2 = a.data->cl;
+          }
+          if ( a.data->y <= b.data->y ) {
+              y1  = a.data->y;
+              y2  = b.data->y;
+              cy1 = a.data->cl;
+              cy2 = b.data->cl;
+          } else {
+              y1  = b.data->y;
+              y2  = a.data->y;
+              cy1 = b.data->cl;
+              cy2 = a.data->cl;
+          }
+
+          node.data->id = key--;
+          node.data->x  = floor( ( a.data->x + b.data->x ) / 2 );
+          node.data->y  = floor( ( a.data->y + b.data->y ) / 2 );
+          node.data->z  = input.halfRound( ( a.data->z + b.data->z ) / 2 );
+          node.data->cl = a.data->cl + b.data->cl;
+          for ( int i = 0; i < INST_LENGTH; i++ ) node.data->ap[i] = t_ap[i];
+          node.data->p = input.cap.getP( t_ap );
+          node.data->ptr = input.cap.getPtr( t_ap );
+
+          return node;
         } );
+    tree->print();
+    auto optimizedNodes = tree->findAllNodes([]( Tree<Sink *>::Node *node ) {
+        return true;
+    });
+    struct MergeStep {
+      int leftId;
+      int rightId;
+      int parentId;
+    };
+    std::vector<MergeStep> mergeSteps;
+    std::unordered_map<int, int> mergeStepMap;
+    int k = input.num_of_sinks;
+    for ( auto& node : optimizedNodes ) {
+        if (node->left != nullptr) {
+          int leftId = node->left->data->id;
+          int rightId = node->right->data->id;
+          int parentId = node->data->id;
+          if (parentId >= input.num_of_sinks || parentId < 0) {
+              mergeStepMap[parentId] = k++;
+          }
+          if (mergeStepMap.find(leftId) != mergeStepMap.end()) leftId = mergeStepMap[leftId];
+          if (mergeStepMap.find(rightId) != mergeStepMap.end()) rightId = mergeStepMap[rightId];
+          if (mergeStepMap.find(parentId) != mergeStepMap.end()) parentId = mergeStepMap[parentId];
+          mergeSteps.push_back({leftId, rightId, parentId});
+        }
+    }
+
+    for ( auto& mergeStep : mergeSteps ) {
+        cout << mergeStep.leftId << " + " << mergeStep.rightId << " => " << mergeStep.parentId << endl;
+    }
 
     //一个算法，优化中间节点的z坐标。不用管它
     input.DLE();

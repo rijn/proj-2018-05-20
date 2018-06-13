@@ -56,26 +56,34 @@ void Tree<T>::Node::updateParentHelper( Node* parent ) {
 
 template <class T>
 void Tree<T>::print() {
-    printHelper( root, 0 );
+    int nodeCount = printHelper( root, 0 );
+    std::cout << "node count = " << nodeCount << std::endl;
 }
 
 template <class T>
-void Tree<T>::printHelper( Node* p, int indent /* = 0 */ ) {
+int Tree<T>::printHelper( Node* p, int indent /* = 0 */ ) {
 #if 1
+    int nodeCount = 0;
     if ( p != nullptr ) {
         if ( p->right ) {
-            printHelper( p->right, indent + 4 );
+            nodeCount += printHelper( p->right, indent + 4 );
         }
         if ( indent ) {
             std::cout << std::setw( indent ) << ' ';
         }
         if ( p->right ) std::cout << " /\n" << std::setw( indent ) << ' ';
-        std::cout << p->id << "\n ";
+        nodeCount++;
+        std::cout << p->id;
+        if (!p->enabled) {
+          std::cout << "!";
+        }
+        std::cout << "\n ";
         if ( p->left ) {
             std::cout << std::setw( indent ) << ' ' << " \\\n";
-            printHelper( p->left, indent + 4 );
+            nodeCount += printHelper( p->left, indent + 4 );
         }
     }
+    return nodeCount;
 #else
     if ( p != nullptr ) {
         printNode( p );
@@ -104,7 +112,7 @@ void Tree<T>::printNode( Node* node ) {
 
 template <class T>
 void Tree<T>::optimize(
-    std::function<float( Tree::Node, Tree::Node )>      distance,
+    std::function<float( Tree::Node&, Tree::Node& )>    distance,
     std::function<Tree::Node( Tree::Node, Tree::Node )> merge, int numLeaves ) {
     auto q = findAllNodesWithNumLeaves( root, numLeaves );
 
@@ -122,7 +130,7 @@ void Tree<T>::optimize(
 
         equivalentNode->parent    = node->parent;
         equivalentNode->numLeaves = numLeaves;
-        if ( node->parent != nullptr ) {
+        if ( node->parent != nullptr || !node->parent->enabled ) {
             if ( node->parent->left == node ) {
                 node->parent->left = equivalentNode;
             }
@@ -151,7 +159,7 @@ void Tree<T>::optimize(
 template <class T>
 void Tree<T>::pushPossibleNodes( std::deque<Tree::Node*>& q, Node* node,
                                  int numLeaves ) {
-    if ( node == nullptr ) return;
+    if ( node == nullptr || !node->enabled ) return;
     if ( node->numLeaves == numLeaves ) {
         q.push_back( node );
     }
@@ -160,15 +168,15 @@ void Tree<T>::pushPossibleNodes( std::deque<Tree::Node*>& q, Node* node,
 
 template <class T>
 typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
-    Node* node, std::function<float( Tree::Node, Tree::Node )> distance,
+    Node* node, std::function<float( Tree::Node&, Tree::Node& )> distance,
     std::function<Tree::Node( Tree::Node, Tree::Node )> merge ) {
     auto leaves = findAllLeaves( node );
 
     struct computeNode {
-        typename std::deque<Tree<T>::Node>           nodes;
-        typename std::deque<Tree<T>::Node>::iterator leftIterator;
-        typename std::deque<Tree<T>::Node>::iterator rightIterator;
-        float                                        cost;
+        typename std::deque<Tree<T>::Node*>           nodes;
+        typename std::deque<Tree<T>::Node*>::iterator leftIterator;
+        typename std::deque<Tree<T>::Node*>::iterator rightIterator;
+        float                                         cost;
     };
 
     float minimalCost    = std::numeric_limits<float>::max();
@@ -178,7 +186,7 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
 
     computeNode initialNode;
     for ( auto& node : leaves ) {
-        initialNode.nodes.push_back( *node );
+        initialNode.nodes.push_back( node );
     }
 
     s.push( initialNode );
@@ -202,7 +210,7 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
             if ( top.nodes.size() == 1 ) {
                 if ( top.cost < minimalCost ) {
                     minimalCost    = top.cost;
-                    equivalentNode = new Node( top.nodes.front() );
+                    equivalentNode = top.nodes.front();
                 }
             }
 
@@ -225,9 +233,13 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
         }
 
         nextNode.cost =
-            top.cost + distance( *top.leftIterator, *top.rightIterator );
+            top.cost + distance( **top.leftIterator, **top.rightIterator );
+        auto mergedNode = merge( **top.leftIterator, **top.rightIterator );
+        mergedNode.left = *top.leftIterator;
+        mergedNode.right = *top.rightIterator;
+        mergedNode.enabled = false;
         nextNode.nodes.push_back(
-            merge( *top.leftIterator, *top.rightIterator ) );
+            new Tree<T>::Node(mergedNode) );
 
         s.push( nextNode );
 
@@ -240,27 +252,34 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
 
 template <class T>
 void Tree<T>::updateNumLeavesUpward( Node* node, int diffNumLeaves ) {
-    if ( node == nullptr ) return;
+    if ( node == nullptr || !node->enabled ) return;
     node->numLeaves -= diffNumLeaves;
     updateNumLeavesUpward( node->parent, diffNumLeaves );
 }
 
 template <class T>
 std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodes(
-    Node* node, std::function<bool( Node* )> const& filter ) {
+    std::function<bool( Node* )> const& filter ) {
+      return findAllNodes( root, filter, false );
+}
+
+template <class T>
+std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodes(
+    Node* node, std::function<bool( Node* )> const& filter,
+    bool stopAtDisabledNode ) {
     std::deque<Tree::Node*> q;
 
-    if ( node == nullptr ) return q;
+    if ( node == nullptr || (stopAtDisabledNode && !node->enabled) ) return q;
+
+    auto q_left = findAllNodes( node->left, filter, stopAtDisabledNode );
+    q.insert( q.end(), q_left.begin(), q_left.end() );
+
+    auto q_right = findAllNodes( node->right, filter, stopAtDisabledNode );
+    q.insert( q.end(), q_right.begin(), q_right.end() );
 
     if ( filter( node ) ) {
         q.push_back( node );
     }
-
-    auto q_left = findAllNodes( node->left, filter );
-    q.insert( q.end(), q_left.begin(), q_left.end() );
-
-    auto q_right = findAllNodes( node->right, filter );
-    q.insert( q.end(), q_right.begin(), q_right.end() );
 
     return q;
 }
