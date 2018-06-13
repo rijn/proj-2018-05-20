@@ -13,6 +13,58 @@
 #define IS_LOAD2 0
 #define NUM_OF_LAYERS 2
 
+void optimize(Tree<Sink *> *tree, CInput* input, int numLeaves) {
+  static int key = -1;
+  tree->optimize(
+    [&]( Tree<Sink *>::Node& a, Tree<Sink *>::Node& b ) {
+      double GI = input->cw * input->distance( a.data->x, a.data->y, b.data->x, b.data->y );
+      double LI = input->cv * ( abs( a.data->z - b.data->z ) );
+      double BI = ( a.data->cl * a.data->p + b.data->cl * b.data->p ) +
+                  0.5 * input->cg * ( a.data->ptr + b.data->ptr );
+      return (float)( GI + LI + BI );
+    },
+    [&]( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
+      Tree<Sink *>::Node node(-1);
+      node.data = new Sink();
+
+      int *  t_ap = input->cap.getAP( a.data->ap, b.data->ap );
+      double x1, x2, y1, y2, cx1, cx2, cy1, cy2;
+      if ( a.data->x <= b.data->x ) {
+          x1  = a.data->x;
+          x2  = b.data->x;
+          cx1 = a.data->cl;
+          cx2 = b.data->cl;
+      } else {
+          x1  = b.data->x;
+          x2  = a.data->x;
+          cx1 = b.data->cl;
+          cx2 = a.data->cl;
+      }
+      if ( a.data->y <= b.data->y ) {
+          y1  = a.data->y;
+          y2  = b.data->y;
+          cy1 = a.data->cl;
+          cy2 = b.data->cl;
+      } else {
+          y1  = b.data->y;
+          y2  = a.data->y;
+          cy1 = b.data->cl;
+          cy2 = a.data->cl;
+      }
+
+      node.data->id = key--;
+      node.data->x  = floor( ( a.data->x + b.data->x ) / 2 );
+      node.data->y  = floor( ( a.data->y + b.data->y ) / 2 );
+      node.data->z  = input->halfRound( ( a.data->z + b.data->z ) / 2 );
+      node.data->cl = a.data->cl + b.data->cl;
+      for ( int i = 0; i < INST_LENGTH; i++ ) node.data->ap[i] = t_ap[i];
+      node.data->p = input->cap.getP( t_ap );
+      node.data->ptr = input->cap.getPtr( t_ap );
+
+      return node;
+    }, numLeaves );
+}
+
 int main() {
     // ofstream f_test("testfile");
     // if (!f_test.is_open())      cout << "love's beautiful so beautiful" <<
@@ -66,56 +118,10 @@ int main() {
     auto tree = input.mapToTree();
     tree->update();
     cout << "Update finish" << endl;
-    int key = -1;
 #if 1
-    tree->optimize(
-        [&]( Tree<Sink *>::Node& a, Tree<Sink *>::Node& b ) {
-          double GI = input.cw * input.distance( a.data->x, a.data->y, b.data->x, b.data->y );
-          double LI = input.cv * ( abs( a.data->z - b.data->z ) );
-          double BI = ( a.data->cl * a.data->p + b.data->cl * b.data->p ) +
-                      0.5 * input.cg * ( a.data->ptr + b.data->ptr );
-          return (float)( GI + LI + BI );
-        },
-        [&]( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
-          Tree<Sink *>::Node node(-1);
-          node.data = new Sink();
-
-          int *  t_ap = input.cap.getAP( a.data->ap, b.data->ap );
-          double x1, x2, y1, y2, cx1, cx2, cy1, cy2;
-          if ( a.data->x <= b.data->x ) {
-              x1  = a.data->x;
-              x2  = b.data->x;
-              cx1 = a.data->cl;
-              cx2 = b.data->cl;
-          } else {
-              x1  = b.data->x;
-              x2  = a.data->x;
-              cx1 = b.data->cl;
-              cx2 = a.data->cl;
-          }
-          if ( a.data->y <= b.data->y ) {
-              y1  = a.data->y;
-              y2  = b.data->y;
-              cy1 = a.data->cl;
-              cy2 = b.data->cl;
-          } else {
-              y1  = b.data->y;
-              y2  = a.data->y;
-              cy1 = b.data->cl;
-              cy2 = a.data->cl;
-          }
-
-          node.data->id = key--;
-          node.data->x  = floor( ( a.data->x + b.data->x ) / 2 );
-          node.data->y  = floor( ( a.data->y + b.data->y ) / 2 );
-          node.data->z  = input.halfRound( ( a.data->z + b.data->z ) / 2 );
-          node.data->cl = a.data->cl + b.data->cl;
-          for ( int i = 0; i < INST_LENGTH; i++ ) node.data->ap[i] = t_ap[i];
-          node.data->p = input.cap.getP( t_ap );
-          node.data->ptr = input.cap.getPtr( t_ap );
-
-          return node;
-        } );
+    optimize(tree, &input, 4);
+    optimize(tree, &input, 5);
+    optimize(tree, &input, 6);
 #endif
     // tree->print();
     auto optimizedNodes = tree->findAllNodes([]( Tree<Sink *>::Node *node ) {
