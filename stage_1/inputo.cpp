@@ -19,6 +19,9 @@
   > @Others:
  ************************************************************************/
 #include "inputo.h"
+
+#include <cstring>
+
 void CInput::setInputData( string file_path, int benchmark ) {
     ifstream file( file_path.c_str() );
     if ( !file.is_open() ) cout << "file is not exist!" << endl;
@@ -591,7 +594,7 @@ Tree<Sink *> *CInput::mapToTree() {
 
 void CInput::copySinkToTreeNode( Tree<Sink *>::Node *node, int key ) {
     node->data = new Sink();
-    memcpy( node->data, &sink[key], sizeof( sink[key] ) );
+    std::memcpy( node->data, &sink[key], sizeof( sink[key] ) );
 }
 
 void CInput::mapToTreeHelper( Tree<Sink *>::Node *node, int key ) {

@@ -67,6 +67,7 @@ int main() {
     tree->update();
     cout << "Update finish" << endl;
     int key = -1;
+#if 1
     tree->optimize(
         [&]( Tree<Sink *>::Node& a, Tree<Sink *>::Node& b ) {
           double GI = input.cw * input.distance( a.data->x, a.data->y, b.data->x, b.data->y );
@@ -115,7 +116,8 @@ int main() {
 
           return node;
         } );
-    tree->print();
+#endif
+    // tree->print();
     auto optimizedNodes = tree->findAllNodes([]( Tree<Sink *>::Node *node ) {
         return true;
     });
@@ -132,7 +134,7 @@ int main() {
           int leftId = node->left->data->id;
           int rightId = node->right->data->id;
           int parentId = node->data->id;
-          if (parentId >= input.num_of_sinks || parentId < 0) {
+          if ((parentId >= input.num_of_sinks || parentId < 0) && mergeStepMap.find(parentId) == mergeStepMap.end()) {
               mergeStepMap[parentId] = k++;
           }
           if (mergeStepMap.find(leftId) != mergeStepMap.end()) leftId = mergeStepMap[leftId];
@@ -143,6 +145,14 @@ int main() {
     }
 
     for ( auto& mergeStep : mergeSteps ) {
+        input.tree_node[mergeStep.parentId].lchild = mergeStep.leftId;
+        input.tree_node[mergeStep.parentId].rchild = mergeStep.rightId;
+        input.tree_node[mergeStep.leftId].parent = input.tree_node[mergeStep.rightId].parent = mergeStep.parentId;
+        input.tree_node[mergeStep.parentId].data = mergeStep.parentId;
+        input.sink[mergeStep.parentId].level = 0;
+
+        input.mergeNode( mergeStep.parentId, mergeStep.leftId, mergeStep.rightId );
+
         cout << mergeStep.leftId << " + " << mergeStep.rightId << " => " << mergeStep.parentId << endl;
     }
 
