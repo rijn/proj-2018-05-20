@@ -119,9 +119,9 @@ int main() {
     tree->update();
     cout << "Update finish" << endl;
 #if 1
-    optimize(tree, &input, 4);
     optimize(tree, &input, 5);
-    optimize(tree, &input, 6);
+    optimize(tree, &input, 4);
+    optimize(tree, &input, 3);
 #endif
     // tree->print();
     auto optimizedNodes = tree->findAllNodes([]( Tree<Sink *>::Node *node ) {
