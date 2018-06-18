@@ -1,0 +1,18 @@
+0 0 11000000 11000000
+source 0 0 0 0
+num sink 4
+1 09000000 09000000 35
+2 09002000 09002000 35
+3 09000600 09000700 35
+4 09000000 09001200 35
+num wirelib 2
+0 0.0001 0.0002
+1 0.0003 0.00016
+num buflib 2
+0 clkinv0.subckt 1 35 80 61.2
+1 clkinv1.subckt 1 4.2 6.1 440
+simulation vdd 1 1.2
+limit slew 100
+limit cap 118000
+num blockage 0
+Instruction 40

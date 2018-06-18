@@ -18,3 +18,7 @@ cd temp
 
 ./run_stage_1
 ./run_stage_2
+
+cd ..
+cp -f ./temp/DME_inputfile ./DME_inputfile
+diff DME_inputfile DME_inputfile_original
