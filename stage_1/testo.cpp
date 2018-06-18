@@ -171,7 +171,7 @@ int main() {
     input.outputInsertedTopoTree();
 
     //输出dme_inputfile
-    input.output4DME( "DME_inputfile_optimized" );
+    input.output4DME( "DME_inputfile" );
 
     input.debug();
     gettimeofday( &end1, NULL );
