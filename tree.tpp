@@ -8,6 +8,17 @@
 #include "tree.hpp"
 
 template <class T>
+void Tree<T>::clean( Tree<T>::Node* node ) {
+    if (node == nullptr || node->isLeaf) return;
+
+    clean(node->left);
+    clean(node->right);
+
+    if (node->data != nullptr) delete node->data;
+    delete node;
+}
+
+template <class T>
 void Tree<T>::update() {
     updateDepthHelper( root, 0 );
     updateIsLeafHelper( root );
@@ -142,9 +153,7 @@ void Tree<T>::optimize(
             root = equivalentNode;
         }
 
-        delete node;
-
-        // TODO: dispose node
+        // clean(node);
 
         updateNumLeavesUpward( equivalentNode, numLeaves - 1 );
 
@@ -211,8 +220,11 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
         if ( top.leftIterator == top.nodes.end() ) {
             if ( top.nodes.size() == 1 ) {
                 if ( top.cost < minimalCost ) {
+                    // clean(equivalentNode);
                     minimalCost    = top.cost;
                     equivalentNode = top.nodes.front();
+                } else {
+                    // clean(top.nodes.front());
                 }
             }
 

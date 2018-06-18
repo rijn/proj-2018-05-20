@@ -39,6 +39,8 @@ class Tree {
 
     Node* root = nullptr;
 
+    void clean( Tree<T>::Node* node );
+
     void update();
     void optimize(
         std::function<float( typename Tree<T>::Node&, typename Tree<T>::Node& )>
