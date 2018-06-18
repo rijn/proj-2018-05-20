@@ -65,6 +65,46 @@ void optimize(Tree<Sink *> *tree, CInput* input, int numLeaves) {
     }, numLeaves );
 }
 
+void updateInput(Tree<Sink *> *tree, CInput* input) {
+    auto optimizedNodes = tree->findAllNodes([]( Tree<Sink *>::Node *node ) {
+        return true;
+    });
+    struct MergeStep {
+      int leftId;
+      int rightId;
+      int parentId;
+    };
+    std::vector<MergeStep> mergeSteps;
+    std::unordered_map<int, int> mergeStepMap;
+    int k = input->num_of_sinks;
+    for ( auto& node : optimizedNodes ) {
+        if (node->left != nullptr) {
+          int leftId = node->left->data->id;
+          int rightId = node->right->data->id;
+          int parentId = node->data->id;
+          if ((parentId >= input->num_of_sinks || parentId < 0) && mergeStepMap.find(parentId) == mergeStepMap.end()) {
+              mergeStepMap[parentId] = k++;
+          }
+          if (mergeStepMap.find(leftId) != mergeStepMap.end()) leftId = mergeStepMap[leftId];
+          if (mergeStepMap.find(rightId) != mergeStepMap.end()) rightId = mergeStepMap[rightId];
+          if (mergeStepMap.find(parentId) != mergeStepMap.end()) parentId = mergeStepMap[parentId];
+          mergeSteps.push_back({leftId, rightId, parentId});
+        }
+    }
+
+    for ( auto& mergeStep : mergeSteps ) {
+        input->tree_node[mergeStep.parentId].lchild = mergeStep.leftId;
+        input->tree_node[mergeStep.parentId].rchild = mergeStep.rightId;
+        input->tree_node[mergeStep.leftId].parent = input->tree_node[mergeStep.rightId].parent = mergeStep.parentId;
+        input->tree_node[mergeStep.parentId].data = mergeStep.parentId;
+        input->sink[mergeStep.parentId].level = 0;
+
+        input->mergeNode( mergeStep.parentId, mergeStep.leftId, mergeStep.rightId );
+
+        cout << mergeStep.leftId << " + " << mergeStep.rightId << " => " << mergeStep.parentId << endl;
+    }
+}
+
 int main() {
     // ofstream f_test("testfile");
     // if (!f_test.is_open())      cout << "love's beautiful so beautiful" <<
@@ -117,51 +157,12 @@ int main() {
 
     auto tree = input.mapToTree();
     tree->update();
-    cout << "Update finish" << endl;
-#if 1
-    optimize(tree, &input, 6);
+
     optimize(tree, &input, 5);
     optimize(tree, &input, 4);
     optimize(tree, &input, 3);
-#endif
-    // tree->print();
-    auto optimizedNodes = tree->findAllNodes([]( Tree<Sink *>::Node *node ) {
-        return true;
-    });
-    struct MergeStep {
-      int leftId;
-      int rightId;
-      int parentId;
-    };
-    std::vector<MergeStep> mergeSteps;
-    std::unordered_map<int, int> mergeStepMap;
-    int k = input.num_of_sinks;
-    for ( auto& node : optimizedNodes ) {
-        if (node->left != nullptr) {
-          int leftId = node->left->data->id;
-          int rightId = node->right->data->id;
-          int parentId = node->data->id;
-          if ((parentId >= input.num_of_sinks || parentId < 0) && mergeStepMap.find(parentId) == mergeStepMap.end()) {
-              mergeStepMap[parentId] = k++;
-          }
-          if (mergeStepMap.find(leftId) != mergeStepMap.end()) leftId = mergeStepMap[leftId];
-          if (mergeStepMap.find(rightId) != mergeStepMap.end()) rightId = mergeStepMap[rightId];
-          if (mergeStepMap.find(parentId) != mergeStepMap.end()) parentId = mergeStepMap[parentId];
-          mergeSteps.push_back({leftId, rightId, parentId});
-        }
-    }
 
-    for ( auto& mergeStep : mergeSteps ) {
-        input.tree_node[mergeStep.parentId].lchild = mergeStep.leftId;
-        input.tree_node[mergeStep.parentId].rchild = mergeStep.rightId;
-        input.tree_node[mergeStep.leftId].parent = input.tree_node[mergeStep.rightId].parent = mergeStep.parentId;
-        input.tree_node[mergeStep.parentId].data = mergeStep.parentId;
-        input.sink[mergeStep.parentId].level = 0;
-
-        input.mergeNode( mergeStep.parentId, mergeStep.leftId, mergeStep.rightId );
-
-        cout << mergeStep.leftId << " + " << mergeStep.rightId << " => " << mergeStep.parentId << endl;
-    }
+    updateInput(tree, &input);
 
     //一个算法，优化中间节点的z坐标。不用管它
     input.DLE();
@@ -170,7 +171,7 @@ int main() {
     input.outputInsertedTopoTree();
 
     //输出dme_inputfile
-    input.output4DME();
+    input.output4DME( "DME_inputfile_optimized" );
 
     input.debug();
     gettimeofday( &end1, NULL );

@@ -534,8 +534,8 @@ void CInput::outputInsertedTopoTree() {
     }
 }
 
-void CInput::output4DME() {
-    ofstream f_DME( "DME_inputfile" );
+void CInput::output4DME(std::string filename) {
+    ofstream f_DME( filename );
     f_DME.precision( 10 );
     f_DME << "This is a output file of the first stage topo tree generation, "
              "and it is the input file of the second stage 3D-DB-DME."

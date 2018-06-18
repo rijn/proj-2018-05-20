@@ -130,7 +130,7 @@ void Tree<T>::optimize(
 
         equivalentNode->parent    = node->parent;
         equivalentNode->numLeaves = numLeaves;
-        if ( node->parent != nullptr && !node->parent->enabled ) {
+        if ( node->parent != nullptr && node->parent->enabled ) {
             if ( node->parent->left == node ) {
                 node->parent->left = equivalentNode;
             }

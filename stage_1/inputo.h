@@ -164,7 +164,7 @@ class CInput {
     void outputInsertedTopoTree();  // output the TSV inserted tree file
     void debug();
 
-    void output4DME();  // the input data for 3D-GB-DME
+    void output4DME( std::string filename );  // the input data for 3D-GB-DME
 
     Tree<Sink *>* mapToTree();
 
