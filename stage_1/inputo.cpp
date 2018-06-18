@@ -141,19 +141,16 @@ void CInput::divideCircuit( int num_of_layers, bool is_load ) {
             sink[i].x = floor( sink[i].x / sqrt( num_of_layers ) );
             sink[i].y = floor( sink[i].y / sqrt( num_of_layers ) );
             sink[i].z = rand() % num_of_layers;
-            sink[i].z = 0;
             f_div_o << sink[i].x << " " << sink[i].y << " " << sink[i].z
                     << endl;
         }
         source.z = rand() % num_of_layers;
-        source.z = 0;
         for ( int i = 0; i < num_of_blockage; i++ ) {
             block[i].ll_x = floor( block[i].ll_x / sqrt( num_of_layers ) );
             block[i].ll_y = floor( block[i].ll_y / sqrt( num_of_layers ) );
             block[i].ur_x = floor( block[i].ur_x / sqrt( num_of_layers ) );
             block[i].ur_y = floor( block[i].ur_y / sqrt( num_of_layers ) );
             block[i].z    = rand() % num_of_layers;
-            block[i].z    = 0;
         }
 
     } else {
@@ -250,7 +247,7 @@ void CInput::NNS() {
         f_sink << "merging right child, b = " << ( *mc_it ).b << endl;
         f_sink << "merging cost = " << ( *mc_it ).merging_cost << endl;
     }
-    // f_sink << sink[213].z << " and " << sink[255].z << endl;
+    f_sink << sink[213].z << " and " << sink[255].z << endl;
     f_sink.close();
     cout << "set info. of sinks successfully!" << endl;
     /*          ***********************             */
@@ -407,7 +404,6 @@ double CInput::getMergingCost( int a, int b ) {
     // + sink[b].level));
     // return GI;
     // return GI*abs(sink[a].cl-sink[b].cl);
-    return GI;
     return ( GI + LI + BI );
 }
 

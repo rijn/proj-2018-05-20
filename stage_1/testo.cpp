@@ -6,7 +6,7 @@
 #include "inputo.h"
 
 //#define FILE "ispd2009/s1"
-#define FILE "ispd2009/ispd09f55"
+#define FILE "ispd2009/ispd09f31"
 //#define FILE "ibm/r5.txt"
 #define IS_WRITE_FILE 1
 #define IS_LOAD1 0
@@ -21,7 +21,6 @@ void optimize(Tree<Sink *> *tree, CInput* input, int numLeaves) {
       double LI = input->cv * ( abs( a.data->z - b.data->z ) );
       double BI = ( a.data->cl * a.data->p + b.data->cl * b.data->p ) +
                   0.5 * input->cg * ( a.data->ptr + b.data->ptr );
-      return (float)GI;
       return (float)( GI + LI + BI );
     },
     [&]( Tree<Sink *>::Node a, Tree<Sink *>::Node b ) {
@@ -120,6 +119,7 @@ int main() {
     tree->update();
     cout << "Update finish" << endl;
 #if 1
+    optimize(tree, &input, 6);
     optimize(tree, &input, 5);
     optimize(tree, &input, 4);
     optimize(tree, &input, 3);
