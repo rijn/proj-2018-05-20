@@ -19,7 +19,7 @@ class Tree {
 
         T data;
 
-        bool enabled   = true;
+        bool enabled = true;
 
         Node( int _id ) : id( _id ){};
         Node( const Node& other ) {

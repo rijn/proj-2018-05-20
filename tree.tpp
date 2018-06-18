@@ -4,18 +4,19 @@
 #include <iostream>
 #include <limits>
 #include <stack>
+#include <unordered_set>
 
 #include "tree.hpp"
 
 template <class T>
 void Tree<T>::clean( Tree<T>::Node* node ) {
-    if (node == nullptr || node->isLeaf) return;
+    if ( node == nullptr || node->isLeaf ) return;
 
-    clean(node->left);
-    clean(node->right);
+    clean( node->left );
+    clean( node->right );
 
-    if (node->data != nullptr) delete node->data;
-    delete node;
+    if ( node->data != nullptr ) delete[] node->data;
+    delete[] node;
 }
 
 template <class T>
@@ -85,8 +86,8 @@ int Tree<T>::printHelper( Node* p, int indent /* = 0 */ ) {
         if ( p->right ) std::cout << " /\n" << std::setw( indent ) << ' ';
         nodeCount++;
         std::cout << p->id;
-        if (!p->enabled) {
-          std::cout << "!";
+        if ( !p->enabled ) {
+            std::cout << "!";
         }
         std::cout << "\n ";
         if ( p->left ) {
@@ -153,7 +154,7 @@ void Tree<T>::optimize(
             root = equivalentNode;
         }
 
-        // clean(node);
+        clean( node );
 
         updateNumLeavesUpward( equivalentNode, numLeaves - 1 );
 
@@ -181,7 +182,8 @@ template <class T>
 typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
     Node* node, std::function<float( Tree::Node&, Tree::Node& )> distance,
     std::function<Tree::Node( Tree::Node, Tree::Node )> merge ) {
-    auto leaves = findAllLeaves( node );
+    auto                               leaves = findAllLeaves( node );
+    std::unordered_set<Tree<T>::Node*> pool;
 
     struct computeNode {
         typename std::deque<Tree<T>::Node*>           nodes;
@@ -220,11 +222,8 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
         if ( top.leftIterator == top.nodes.end() ) {
             if ( top.nodes.size() == 1 ) {
                 if ( top.cost < minimalCost ) {
-                    // clean(equivalentNode);
                     minimalCost    = top.cost;
                     equivalentNode = top.nodes.front();
-                } else {
-                    // clean(top.nodes.front());
                 }
             }
 
@@ -249,16 +248,29 @@ typename Tree<T>::Node* Tree<T>::findPermutationAndReplaceByEquivalentNode(
         nextNode.cost =
             top.cost + distance( **top.leftIterator, **top.rightIterator );
         auto mergedNode = merge( **top.leftIterator, **top.rightIterator );
-        mergedNode.left = *top.leftIterator;
-        mergedNode.right = *top.rightIterator;
+
+        mergedNode.left    = *top.leftIterator;
+        mergedNode.right   = *top.rightIterator;
         mergedNode.enabled = false;
-        nextNode.nodes.push_back(
-            new Tree<T>::Node(mergedNode) );
+        auto newNode       = new Tree<T>::Node( mergedNode );
+        pool.insert( newNode );
+
+        nextNode.nodes.push_back( newNode );
 
         s.push( nextNode );
 
         s.top().leftIterator  = s.top().nodes.begin();
         s.top().rightIterator = s.top().nodes.begin();
+    }
+
+    auto allNodesUsed = findAllNodes(
+        equivalentNode, []( Tree<T>::Node* node ) { return true; }, false );
+    for ( auto& node : allNodesUsed ) {
+        pool.erase( node );
+    }
+    for ( auto& node : pool ) {
+        if ( node->data != nullptr ) delete[] node->data;
+        delete[] node;
     }
 
     return equivalentNode;
@@ -274,7 +286,7 @@ void Tree<T>::updateNumLeavesUpward( Node* node, int diffNumLeaves ) {
 template <class T>
 std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodes(
     std::function<bool( Node* )> const& filter ) {
-      return findAllNodes( root, filter, false );
+    return findAllNodes( root, filter, false );
 }
 
 template <class T>
@@ -283,7 +295,7 @@ std::deque<typename Tree<T>::Node*> Tree<T>::findAllNodes(
     bool stopAtDisabledNode ) {
     std::deque<Tree::Node*> q;
 
-    if ( node == nullptr || (stopAtDisabledNode && !node->enabled) ) return q;
+    if ( node == nullptr || ( stopAtDisabledNode && !node->enabled ) ) return q;
 
     auto q_left = findAllNodes( node->left, filter, stopAtDisabledNode );
     q.insert( q.end(), q_left.begin(), q_left.end() );
