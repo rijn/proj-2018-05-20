@@ -142,6 +142,8 @@ void Tree<T>::optimize(
             root = equivalentNode;
         }
 
+        delete node;
+
         // TODO: dispose node
 
         updateNumLeavesUpward( equivalentNode, numLeaves - 1 );
