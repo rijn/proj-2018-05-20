@@ -167,9 +167,10 @@ int main() {
     auto tree = input.mapToTree();
     tree->update();
 
-    // optimize( tree, &input, 6 );
-    // optimize( tree, &input, 5 );
-    // optimize( tree, &input, 4 );
+    optimize( tree, &input, 7 );
+    optimize( tree, &input, 6 );
+    optimize( tree, &input, 5 );
+    optimize( tree, &input, 4 );
     optimize( tree, &input, 3 );
 
     updateInput( tree, &input );
